@@ -114,12 +114,12 @@ const startServer = async () => {
       console.log(`✅ Default admin user created: ${adminUsername}`);
     }
 
-    // Start server
-    app.listen(PORT, () => {
+    // Start server - listen on 0.0.0.0 for Hostinger
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`\n╔══════════════════════════════════════════════════════════════╗`);
       console.log(`║     Real Estate Management System - Node.js                  ║`);
       console.log(`╚══════════════════════════════════════════════════════════════╝`);
-      console.log(`\n✅ Server running on http://localhost:${PORT}`);
+      console.log(`\n✅ Server running on http://0.0.0.0:${PORT}`);
       console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
       console.log(`\n📖 Available routes:`);
       console.log(`   - Homepage: http://localhost:${PORT}/`);
@@ -130,6 +130,12 @@ const startServer = async () => {
       console.log(`   Username: ${adminUsername}`);
       console.log(`   Password: ${adminPassword}`);
       console.log(`\n`);
+    }).on('error', (err) => {
+      console.error('❌ Server failed to start:', err);
+      if (err.code === 'EADDRINUSE') {
+        console.error(`⚠️  Port ${PORT} is already in use. Try a different port.`);
+      }
+      process.exit(1);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
