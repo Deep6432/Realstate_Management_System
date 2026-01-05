@@ -5,10 +5,15 @@
 RewriteEngine On
 RewriteBase /
 
-# Handle static files directly
-RewriteCond %{REQUEST_URI} ^/static/
+# Handle static files directly - serve from public directory
+RewriteCond %{REQUEST_URI} ^/(static|css|js|images|favicon\.svg)/
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^static/(.*)$ public/$1 [L]
+RewriteRule ^(static|css|js|images|favicon\.svg)/(.*)$ public/$1/$2 [L]
+
+# Handle static files at root level
+RewriteCond %{REQUEST_URI} ^/(css|js|images|favicon\.svg)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(css|js|images|favicon\.svg)/(.*)$ public/$1/$2 [L]
 
 # Handle uploads
 RewriteCond %{REQUEST_URI} ^/uploads/
