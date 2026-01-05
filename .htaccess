@@ -1,25 +1,34 @@
-# Apache configuration for Hostinger deployment
-# This file helps serve static files and route requests properly
+# Apache configuration for Hostinger Node.js deployment
 
+# Enable Rewrite Engine
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
 
-# Handle static files (served by WhiteNoise, but Apache can also serve them)
+# Handle static files directly
 RewriteCond %{REQUEST_URI} ^/static/
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^static/(.*)$ staticfiles/$1 [L]
+RewriteRule ^static/(.*)$ public/$1 [L]
 
-# Handle media files
-RewriteCond %{REQUEST_URI} ^/media/
+# Handle uploads
+RewriteCond %{REQUEST_URI} ^/uploads/
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^media/(.*)$ media/$1 [L]
+RewriteRule ^uploads/(.*)$ uploads/$1 [L]
 
-# Route all other requests to Gunicorn via Passenger (if using Passenger)
-# Or to your WSGI application
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ /index.py [L,QSA]
+# Proxy all other requests to Node.js (if using reverse proxy)
+# Uncomment if you're using Apache as reverse proxy to Node.js
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^(.*)$ http://localhost:3000/$1 [P,L]
+
+# If using Passenger for Node.js (Hostinger supports this)
+<IfModule mod_passenger.c>
+  PassengerAppRoot /home/your_username/public_html
+  PassengerAppType node
+  PassengerStartupFile server.js
+  PassengerNodejs /usr/bin/node
+  PassengerEnabled On
+</IfModule>
 </IfModule>
 
 # Security headers
@@ -49,5 +58,3 @@ Options -Indexes
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
-
-

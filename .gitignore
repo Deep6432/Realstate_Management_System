@@ -60,6 +60,16 @@ uploads/*
 !uploads/.gitkeep
 !uploads/property_images/.gitkeep
 
+# Logs
+logs/
+*.log
+pm2-error.log
+pm2-out.log
+
+# Database
+database.sqlite
+*.db
+
 # IDE
 .vscode/
 .idea/

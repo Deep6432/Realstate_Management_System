@@ -9,7 +9,9 @@ const { sequelize, testConnection } = require('./config/database');
 const routes = require('./routes/index');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+// Use PORT from environment or default to 3000
+// Hostinger may set PORT automatically
+const PORT = process.env.PORT || process.env.NODE_PORT || 3000;
 
 // View engine setup
 app.set('view engine', 'ejs');
