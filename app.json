@@ -1,0 +1,29 @@
+{
+  "name": "Real Estate Management System",
+  "description": "Real Estate Inventory Management System",
+  "repository": "https://github.com/Deep6432/Realstate_Management_System",
+  "keywords": ["node", "express", "real-estate", "property-management"],
+  "image": "heroku/nodejs",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "env": {
+    "NODE_ENV": {
+      "required": true,
+      "value": "production"
+    }
+  },
+  "engines": {
+    "node": "18.x",
+    "npm": "9.x"
+  }
+}
+
