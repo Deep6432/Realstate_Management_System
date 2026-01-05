@@ -33,8 +33,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-// Static files configuration - Multiple paths for Hostinger compatibility
+// Static files configuration - HOSTINGER-SPECIFIC FIX
+// IMPORTANT: Use absolute path and /public prefix (required for Hostinger)
 const publicPath = path.join(__dirname, 'public');
+
 const staticOptions = {
   maxAge: '1d',
   etag: true,
@@ -54,16 +56,18 @@ const staticOptions = {
   }
 };
 
-// Serve static files from multiple paths for Hostinger compatibility
-app.use(express.static(publicPath, staticOptions)); // Root level
-app.use('/static', express.static(publicPath, staticOptions)); // /static path
-app.use('/css', express.static(path.join(publicPath, 'css'), staticOptions)); // Direct /css path
-app.use('/js', express.static(path.join(publicPath, 'js'), staticOptions)); // Direct /js path
-app.use('/images', express.static(path.join(publicPath, 'images'), staticOptions)); // Direct /images path
+// CRITICAL: Use /public prefix (Hostinger requirement)
+app.use('/public', express.static(publicPath, staticOptions));
+
+// Fallback paths for compatibility
+app.use('/static', express.static(publicPath, staticOptions));
+app.use(express.static(publicPath, staticOptions)); // Root level fallback
+
+// Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Explicit routes for critical static files (fallback)
-app.get('/static/css/style.css', (req, res) => {
+// Explicit routes for critical static files (Hostinger fallback)
+app.get('/public/css/style.css', (req, res) => {
   res.sendFile(path.join(publicPath, 'css', 'style.css'), {
     headers: {
       'Content-Type': 'text/css; charset=utf-8'
@@ -71,7 +75,7 @@ app.get('/static/css/style.css', (req, res) => {
   });
 });
 
-app.get('/static/js/main.js', (req, res) => {
+app.get('/public/js/main.js', (req, res) => {
   res.sendFile(path.join(publicPath, 'js', 'main.js'), {
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8'
@@ -79,7 +83,7 @@ app.get('/static/js/main.js', (req, res) => {
   });
 });
 
-app.get('/static/favicon.svg', (req, res) => {
+app.get('/public/favicon.svg', (req, res) => {
   res.sendFile(path.join(publicPath, 'favicon.svg'), {
     headers: {
       'Content-Type': 'image/svg+xml'
