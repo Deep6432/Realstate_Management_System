@@ -13,6 +13,17 @@ const app = express();
 // Hostinger may set PORT automatically
 const PORT = process.env.PORT || process.env.NODE_PORT || 3000;
 
+// Error handling for uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('❌ Unhandled Rejection:', err);
+  process.exit(1);
+});
+
 // View engine setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
