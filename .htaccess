@@ -5,15 +5,39 @@
 RewriteEngine On
 RewriteBase /
 
-# Handle static files directly - serve from public directory
-RewriteCond %{REQUEST_URI} ^/(static|css|js|images|favicon\.svg)/
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(static|css|js|images|favicon\.svg)/(.*)$ public/$1/$2 [L]
+# Handle static files - serve directly from public directory
+# This ensures static files are served even if Node.js routing fails
 
-# Handle static files at root level
-RewriteCond %{REQUEST_URI} ^/(css|js|images|favicon\.svg)
+# Handle /static/* paths
+RewriteCond %{REQUEST_URI} ^/static/(.*)$
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(css|js|images|favicon\.svg)/(.*)$ public/$1/$2 [L]
+RewriteRule ^static/(.*)$ public/$1 [L]
+
+# Handle direct CSS files
+RewriteCond %{REQUEST_URI} ^/css/(.*)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^css/(.*)$ public/css/$1 [L]
+
+# Handle direct JS files
+RewriteCond %{REQUEST_URI} ^/js/(.*)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^js/(.*)$ public/js/$1 [L]
+
+# Handle direct images
+RewriteCond %{REQUEST_URI} ^/images/(.*)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^images/(.*)$ public/images/$1 [L]
+
+# Handle favicon
+RewriteCond %{REQUEST_URI} ^/favicon\.svg$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^favicon\.svg$ public/favicon.svg [L]
+
+# Handle static files at root (css/style.css, js/main.js, etc.)
+RewriteCond %{REQUEST_URI} \.(css|js|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot)$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_URI} ^/([^/]+\.(css|js|svg|png|jpg|jpeg|gif|ico|woff|woff2|ttf|eot))$
+RewriteRule ^(.*)$ public/$1 [L]
 
 # Handle uploads
 RewriteCond %{REQUEST_URI} ^/uploads/

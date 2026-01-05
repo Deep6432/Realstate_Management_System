@@ -33,7 +33,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-// Static files - serve from root and /static with explicit configuration
+// Static files configuration - Multiple paths for Hostinger compatibility
+const publicPath = path.join(__dirname, 'public');
 const staticOptions = {
   maxAge: '1d',
   etag: true,
@@ -45,13 +46,46 @@ const staticOptions = {
       res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     } else if (filePath.endsWith('.svg')) {
       res.setHeader('Content-Type', 'image/svg+xml');
+    } else if (filePath.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
     }
   }
 };
 
-app.use(express.static(path.join(__dirname, 'public'), staticOptions));
-app.use('/static', express.static(path.join(__dirname, 'public'), staticOptions));
+// Serve static files from multiple paths for Hostinger compatibility
+app.use(express.static(publicPath, staticOptions)); // Root level
+app.use('/static', express.static(publicPath, staticOptions)); // /static path
+app.use('/css', express.static(path.join(publicPath, 'css'), staticOptions)); // Direct /css path
+app.use('/js', express.static(path.join(publicPath, 'js'), staticOptions)); // Direct /js path
+app.use('/images', express.static(path.join(publicPath, 'images'), staticOptions)); // Direct /images path
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Explicit routes for critical static files (fallback)
+app.get('/static/css/style.css', (req, res) => {
+  res.sendFile(path.join(publicPath, 'css', 'style.css'), {
+    headers: {
+      'Content-Type': 'text/css; charset=utf-8'
+    }
+  });
+});
+
+app.get('/static/js/main.js', (req, res) => {
+  res.sendFile(path.join(publicPath, 'js', 'main.js'), {
+    headers: {
+      'Content-Type': 'application/javascript; charset=utf-8'
+    }
+  });
+});
+
+app.get('/static/favicon.svg', (req, res) => {
+  res.sendFile(path.join(publicPath, 'favicon.svg'), {
+    headers: {
+      'Content-Type': 'image/svg+xml'
+    }
+  });
+});
 
 // Session configuration
 app.use(session({
