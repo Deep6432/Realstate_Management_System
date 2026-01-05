@@ -1,241 +1,210 @@
 # Real Estate Inventory Management System
 
-A comprehensive web-based Real Estate Inventory Management System built with Django, MySQL, and modern frontend technologies. This system allows admins to manage different types of real estate properties and enables users to search properties easily by city and other fields.
+A complete Node.js/Express.js application for managing real estate properties with advanced search, filtering, and admin dashboard.
 
-## Features
+## 🚀 Features
 
-### Property Management
-- **8 Property Types**: Home, Flat/Apartment, Land, Commercial Land, Plot, Farm Land, Warehouse, Shop
-- **Complete Property Information**: City, Khasra Number, Full Address, Size, Description, Status
-- **Multiple Image Upload**: Support for multiple images per property
-- **Status Management**: Available, Sold, On Hold
+- ✅ Property management (CRUD operations)
+- ✅ Multiple image uploads per property
+- ✅ Advanced search and filtering
+- ✅ Admin dashboard with statistics
+- ✅ User authentication
+- ✅ Responsive design
+- ✅ SQLite/MySQL database support
 
-### Search & Filter
-- **City-based Search**: Primary search functionality on homepage
-- **Global Search**: Search across all fields (city, khasra number, address, type, description)
-- **Advanced Filters**: Filter by property type, city, size range, and status
-- **Real-time Results**: AJAX-based search for instant results
+## 📋 Prerequisites
 
-### User Interface
-- **Responsive Design**: Works seamlessly on mobile and desktop
-- **Admin Panel**: Secure login system with dashboard
-- **Property Listings**: Beautiful card-based property display
-- **Property Details**: Comprehensive property detail pages
-- **Image Gallery**: Image preview and thumbnail navigation
+- Node.js 14+ and npm
+- SQLite (for local development) or MySQL (for production)
+- Git (optional)
 
-## Tech Stack
+## 🛠️ Installation
 
-- **Backend**: Django 4.2.7 (Python)
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Database**: MySQL
-- **Web Server**: Gunicorn
-- **Image Processing**: Pillow
+### 1. Install Dependencies
 
-## Installation & Setup
-
-### Prerequisites
-- Python 3.8+
-- MySQL 5.7+ or MySQL 8.0+
-- pip (Python package manager)
-
-### Step 1: Clone the Repository
 ```bash
-git clone <repository-url>
-cd "Real Estate invt Management"
+npm install
 ```
 
-### Step 2: Create Virtual Environment
-```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
+### 2. Configure Environment
 
-### Step 3: Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+Copy `.env.example` to `.env` and update with your settings:
 
-### Step 4: Configure Environment Variables
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` file with your settings:
+Edit `.env`:
 ```env
-SECRET_KEY=your-secret-key-here
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-DB_NAME=realestate_db
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
-DB_HOST=localhost
-DB_PORT=3306
+NODE_ENV=development
+PORT=3000
+DB_ENGINE=sqlite
+# For MySQL, use:
+# DB_ENGINE=mysql
+# DB_HOST=localhost
+# DB_PORT=3306
+# DB_NAME=realestate_db
+# DB_USER=root
+# DB_PASSWORD=your_password
+SESSION_SECRET=your-random-secret-key
+ADMIN_USERNAME=Ajay
+ADMIN_PASSWORD=Ajay@2026
 ```
 
-### Step 5: Create MySQL Database
-```sql
-CREATE DATABASE realestate_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+### 3. Run the Application
 
-### Step 6: Run Migrations
 ```bash
-python manage.py makemigrations
-python manage.py migrate
+# Development mode (with auto-reload)
+npm run dev
+
+# Production mode
+npm start
 ```
 
-### Step 7: Create Superuser (Admin)
-```bash
-python manage.py createsuperuser
-```
+The application will be available at: `http://localhost:3000`
 
-Follow the prompts to create an admin account.
-
-### Step 8: Collect Static Files
-```bash
-python manage.py collectstatic --noinput
-```
-
-### Step 9: Run Development Server
-```bash
-python manage.py runserver
-```
-
-Visit `http://localhost:8000` to see the application.
-
-## Deployment on Hostinger
-
-### Step 1: Upload Files
-Upload all project files to your Hostinger hosting account (typically to `public_html` or a subdirectory).
-
-### Step 2: Configure Environment Variables
-Create a `.env` file on the server with production settings:
-```env
-SECRET_KEY=your-production-secret-key
-DEBUG=False
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-DB_NAME=your_hostinger_db_name
-DB_USER=your_hostinger_db_user
-DB_PASSWORD=your_hostinger_db_password
-DB_HOST=localhost
-DB_PORT=3306
-```
-
-### Step 3: Set Up MySQL Database
-1. Log in to Hostinger hPanel
-2. Go to MySQL Databases
-3. Create a new database and user
-4. Note down the database credentials
-
-### Step 4: Install Dependencies
-SSH into your Hostinger account and run:
-```bash
-cd public_html  # or your project directory
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-### Step 5: Run Migrations
-```bash
-python manage.py migrate
-python manage.py createsuperuser
-python manage.py collectstatic --noinput
-```
-
-### Step 6: Configure Gunicorn
-Create a systemd service file or use Hostinger's process manager to run:
-```bash
-gunicorn --config gunicorn_config.py realestate_project.wsgi:application
-```
-
-### Step 7: Configure Web Server
-Set up your web server (Apache/Nginx) to:
-- Serve static files from `/staticfiles`
-- Serve media files from `/media`
-- Proxy requests to Gunicorn on port 8000
-
-### Step 8: Set File Permissions
-```bash
-chmod -R 755 staticfiles
-chmod -R 755 media
-```
-
-## Project Structure
+## 📁 Project Structure
 
 ```
-Real Estate invt Management/
-├── manage.py
-├── requirements.txt
-├── gunicorn_config.py
-├── .env.example
-├── .gitignore
-├── README.md
-├── realestate_project/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── wsgi.py
-│   └── asgi.py
-├── properties/
-│   ├── __init__.py
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   ├── admin.py
-│   └── apps.py
-├── templates/
-│   ├── base.html
-│   └── properties/
-│       ├── homepage.html
-│       ├── property_list.html
-│       ├── property_detail.html
-│       └── admin_dashboard.html
-├── static/
+.
+├── config/
+│   └── database.js          # Database configuration
+├── controllers/
+│   ├── authController.js    # Authentication logic
+│   └── propertyController.js # Property CRUD operations
+├── middleware/
+│   ├── auth.js              # Authentication middleware
+│   └── upload.js            # File upload configuration
+├── models/
+│   ├── Property.js          # Property model
+│   ├── PropertyImage.js     # Property image model
+│   ├── User.js              # User model
+│   └── index.js             # Model associations
+├── routes/
+│   └── index.js             # All routes
+├── views/
+│   ├── partials/            # Shared templates
+│   └── properties/           # Property pages
+├── public/                   # Static files
 │   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── main.js
-├── media/
+│   ├── js/
+│   └── images/
+├── uploads/                  # Uploaded files
 │   └── property_images/
-└── staticfiles/
+├── server.js                 # Main server file
+├── package.json
+└── .env                      # Environment variables
 ```
 
-## Usage
+## 🔑 Default Admin Credentials
 
-### Admin Panel
-1. Navigate to `/admin/`
-2. Login with your superuser credentials
-3. Manage properties:
-   - Add new properties
-   - Edit existing properties
-   - Upload multiple images
-   - Delete properties
-4. View dashboard at `/admin/dashboard/`
+- **Username:** Ajay
+- **Password:** Ajay@2026
 
-### User Features
-1. **Homepage**: Search properties by city
-2. **Global Search**: Search across all fields
-3. **Property Listings**: Browse all properties with filters
-4. **Property Details**: View complete property information
+(Change these in `.env` file)
 
-## API Endpoints
+## 📚 API Endpoints
 
-- `GET /api/search/?q=query` - Global search API (returns JSON)
+### Public Routes
+- `GET /` - Homepage
+- `GET /properties` - Property listing with filters
+- `GET /property/:id` - Property detail page
+- `GET /api/search?q=query` - AJAX search API
 
-## Security Notes
+### Auth Routes
+- `GET /login` - Login page
+- `POST /login` - Login submission
+- `GET /logout` - Logout
 
-- Change `SECRET_KEY` in production
-- Set `DEBUG=False` in production
-- Use strong database passwords
-- Keep dependencies updated
-- Use HTTPS in production
+### Admin Routes (Protected)
+- `GET /admin/dashboard` - Admin dashboard
+- `GET /admin/property/add` - Add property form
+- `POST /admin/property/add` - Create property
+- `GET /admin/property/:id/edit` - Edit property form
+- `POST /admin/property/:id/edit` - Update property
+- `GET /admin/property/:id/delete` - Delete confirmation
+- `POST /admin/property/:id/delete` - Delete property
 
-## Support
+## 🗄️ Database Models
 
-For issues or questions, please contact the development team.
+### Property
+- property_type (ENUM)
+- city (STRING)
+- khasra_number (STRING)
+- full_address (TEXT)
+- size (DECIMAL)
+- size_unit (ENUM)
+- description (TEXT)
+- status (ENUM)
+- created_at, updated_at
 
-## License
+### PropertyImage
+- property_id (INTEGER, Foreign Key)
+- image (STRING - filename)
+- uploaded_at (DATE)
 
-This project is proprietary software. All rights reserved.
+### User
+- username (STRING)
+- email (STRING)
+- password (STRING - hashed)
+- is_admin (BOOLEAN)
+- created_at, updated_at
 
+## 🔧 Technologies Used
 
+- **Express.js** - Web framework
+- **Sequelize** - ORM for SQLite/MySQL
+- **EJS** - Template engine
+- **Multer** - File upload handling
+- **bcryptjs** - Password hashing
+- **express-session** - Session management
+- **connect-flash** - Flash messages
+
+## 🚀 Deployment
+
+### For Production:
+
+1. Set `NODE_ENV=production` in `.env`
+2. Update database credentials
+3. Set a strong `SESSION_SECRET`
+4. Use PM2 or similar process manager:
+
+```bash
+npm install -g pm2
+pm2 start server.js --name realestate
+pm2 save
+pm2 startup
+```
+
+## 📝 Notes
+
+- Images are stored in `uploads/property_images/`
+- Static files are served from `public/`
+- Sessions are stored in memory (use Redis for production)
+- Database tables are auto-created on first run
+- SQLite is used by default for local development
+
+## 🐛 Troubleshooting
+
+### Database Connection Error
+- Check database credentials in `.env`
+- Verify database exists
+- For SQLite, ensure write permissions
+
+### Images Not Uploading
+- Check `uploads/property_images/` directory exists
+- Verify file permissions
+- Check `MAX_FILE_SIZE` in `.env`
+
+### Session Issues
+- Clear browser cookies
+- Check `SESSION_SECRET` is set
+- Verify session middleware is configured
+
+## 📄 License
+
+ISC
+
+---
+
+**Built with Node.js and Express.js**

@@ -1,0 +1,127 @@
+<%- include('../partials/header', { title: 'Properties - Real Estate Inventory' }) %>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Property Listings</h1>
+        <a href="/" class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                <path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back to Home
+        </a>
+    </div>
+
+    <div class="filters-section">
+        <form method="GET" action="/properties" class="filters-form">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search:</label>
+                    <input type="text" name="search" placeholder="Search all fields..." value="<%= current_search %>" class="filter-input">
+                </div>
+                
+                <div class="filter-group">
+                    <label>City:</label>
+                    <input type="text" name="city" placeholder="City..." value="<%= current_city %>" class="filter-input">
+                </div>
+
+                <div class="filter-group">
+                    <label>Property Type:</label>
+                    <select name="property_type" class="filter-select">
+                        <option value="">All Types</option>
+                        <% property_types.forEach(function([value, label]) { %>
+                            <option value="<%= value %>" <%= current_type === value ? 'selected' : '' %>><%= label %></option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Status:</label>
+                    <select name="status" class="filter-select">
+                        <option value="">All Status</option>
+                        <% status_choices.forEach(function([value, label]) { %>
+                            <option value="<%= value %>" <%= current_status === value ? 'selected' : '' %>><%= label %></option>
+                        <% }); %>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Size Range:</label>
+                    <div class="size-range">
+                        <input type="number" name="size_min" placeholder="Min" value="<%= size_min %>" class="filter-input size-input" step="0.01">
+                        <span>to</span>
+                        <input type="number" name="size_max" placeholder="Max" value="<%= size_max %>" class="filter-input size-input" step="0.01">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <button type="submit" class="btn-primary">Apply Filters</button>
+                    <a href="/properties" class="btn-secondary">Clear</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="properties-grid">
+        <% if (properties && properties.length > 0) { %>
+            <% properties.forEach(function(property) { %>
+                <div class="property-card">
+                    <a href="/property/<%= property.id %>">
+                        <% 
+                        const primaryImage = property.images && property.images.length > 0 ? property.images[0] : null;
+                        if (primaryImage) { %>
+                            <div class="property-image">
+                                <img src="/uploads/property_images/<%= primaryImage.image %>" alt="<%= property.property_type %>">
+                            </div>
+                        <% } else { %>
+                            <div class="property-image-placeholder">
+                                <span>No Image</span>
+                            </div>
+                        <% } %>
+                        
+                        <div class="property-card-body">
+                            <div class="property-type-badge"><%= property.property_type %></div>
+                            <h3 class="property-title"><%= property.city %></h3>
+                            <p class="property-khasra">Khasra: <%= property.khasra_number %></p>
+                            <p class="property-size"><%= property.size %> <%= property.size_unit %></p>
+                            <div class="property-status status-<%= property.status.toLowerCase().replace(/\s+/g, '-') %>">
+                                <%= property.status %>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="no-results">
+                <p>No properties found matching your criteria.</p>
+                <a href="/properties" class="btn-primary">View All Properties</a>
+            </div>
+        <% } %>
+    </div>
+
+    <% if (totalPages > 1) { %>
+        <div class="pagination">
+            <% if (currentPage > 1) { %>
+                <a href="/properties?page=<%= currentPage - 1 %><%= current_search ? '&search=' + encodeURIComponent(current_search) : '' %><%= current_city ? '&city=' + encodeURIComponent(current_city) : '' %>" class="page-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Previous
+                </a>
+            <% } %>
+            
+            <span class="page-info">Page <%= currentPage %> of <%= totalPages %></span>
+            
+            <% if (currentPage < totalPages) { %>
+                <a href="/properties?page=<%= currentPage + 1 %><%= current_search ? '&search=' + encodeURIComponent(current_search) : '' %><%= current_city ? '&city=' + encodeURIComponent(current_city) : '' %>" class="page-link">
+                    Next
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../partials/footer') %>
+

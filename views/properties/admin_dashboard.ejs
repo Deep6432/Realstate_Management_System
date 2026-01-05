@@ -1,0 +1,134 @@
+<%- include('../partials/header', { title: 'Admin Dashboard' }) %>
+
+<div class="container">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <a href="/admin/property/add" class="btn-primary">+ Add New Property</a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3V21H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M7 16L12 11L16 15L21 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M21 10V3H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="stat-value"><%= total_properties %></div>
+            <div class="stat-label">Total Properties</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="stat-value"><%= available_properties %></div>
+            <div class="stat-label">Available</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2V22M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="stat-value"><%= sold_properties %></div>
+            <div class="stat-label">Sold</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 9V15M14 9V15M19 10C19 14.9706 14.9706 19 10 19C5.02944 19 1 14.9706 1 10C1 5.02944 5.02944 1 10 1C14.9706 1 19 5.02944 19 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="stat-value"><%= on_hold_properties %></div>
+            <div class="stat-label">On Hold</div>
+        </div>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Properties by Type</h2>
+        <div class="type-stats-grid">
+            <% Object.entries(properties_by_type).forEach(function([prop_type, count]) { %>
+                <div class="type-stat-card">
+                    <h3><%= prop_type %></h3>
+                    <div class="type-count"><%= count %></div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h2><%= section_title %></h2>
+            <form method="GET" action="/admin/dashboard" class="search-form-inline">
+                <div class="search-input-wrapper">
+                    <input 
+                        type="text" 
+                        name="search" 
+                        class="search-input-field" 
+                        placeholder="Search properties by city, khasra, address, type..."
+                        value="<%= search_query %>"
+                    >
+                    <button type="submit" class="search-submit-btn">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 17C13.4183 17 17 13.4183 17 9C17 4.58172 13.4183 1 9 1C4.58172 1 1 4.58172 1 9C1 13.4183 4.58172 17 9 17Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M19 19L14.65 14.65" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <% if (search_query) { %>
+                        <a href="/admin/dashboard" class="clear-search-btn" title="Clear search">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                        </a>
+                    <% } %>
+                </div>
+            </form>
+        </div>
+        <div class="recent-properties-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>City</th>
+                        <th>Khasra Number</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                        <th>Date Added</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (properties && properties.length > 0) { %>
+                        <% properties.forEach(function(prop) { %>
+                            <tr>
+                                <td><%= prop.property_type %></td>
+                                <td><%= prop.city %></td>
+                                <td><%= prop.khasra_number %></td>
+                                <td><%= prop.size %> <%= prop.size_unit %></td>
+                                <td><span class="status-badge status-<%= prop.status.toLowerCase().replace(/\s+/g, '-') %>"><%= prop.status %></span></td>
+                                <td><%= new Date(prop.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/admin/property/<%= prop.id %>/edit" class="btn-small btn-edit">Edit</a>
+                                        <a href="/property/<%= prop.id %>" class="btn-small btn-view">View</a>
+                                        <a href="/admin/property/<%= prop.id %>/delete" class="btn-small btn-delete" onclick="return confirm('Are you sure you want to delete this property? This action cannot be undone.');">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="7">No properties found.</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+

@@ -1,0 +1,93 @@
+<%- include('../partials/header', { title: property.property_type + ' - ' + property.city }) %>
+
+<div class="container">
+    <div class="property-detail-header">
+        <a href="/properties" class="btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                <path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back to Listings
+        </a>
+        <h1><%= property.property_type %> - <%= property.city %></h1>
+    </div>
+
+    <div class="property-detail-content">
+        <div class="property-images-section">
+            <% if (images && images.length > 0) { %>
+                <div class="main-image">
+                    <img id="main-image" src="/uploads/property_images/<%= images[0].image %>" alt="<%= property.property_type %>">
+                </div>
+                <% if (images.length > 1) { %>
+                    <div class="image-thumbnails">
+                        <% images.forEach(function(image, index) { %>
+                            <img src="/uploads/property_images/<%= image.image %>" alt="Thumbnail <%= index + 1 %>" 
+                                 class="thumbnail <%= index === 0 ? 'active' : '' %>"
+                                 onclick="changeMainImage('/uploads/property_images/<%= image.image %>')">
+                        <% }); %>
+                    </div>
+                <% } %>
+            <% } else { %>
+                <div class="no-image-placeholder">
+                    <span>No Images Available</span>
+                </div>
+            <% } %>
+        </div>
+
+        <div class="property-info-section">
+            <div class="property-info-card">
+                <h2>Property Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <label>Property Type:</label>
+                        <span><%= property.property_type %></span>
+                    </div>
+                    <div class="info-item">
+                        <label>City / District / Village:</label>
+                        <span><%= property.city %></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Khasra Number:</label>
+                        <span><%= property.khasra_number %></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Property Size:</label>
+                        <span><%= property.size %> <%= property.size_unit %></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Status:</label>
+                        <span class="status-badge status-<%= property.status.toLowerCase().replace(/\s+/g, '-') %>"><%= property.status %></span>
+                    </div>
+                    <div class="info-item">
+                        <label>Date Added:</label>
+                        <span><%= new Date(property.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-info-card">
+                <h2>Full Address</h2>
+                <p class="address-text"><%= property.full_address %></p>
+            </div>
+
+            <% if (property.description) { %>
+                <div class="property-info-card">
+                    <h2>Description</h2>
+                    <p class="description-text"><%= property.description %></p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+function changeMainImage(imageUrl) {
+    document.getElementById('main-image').src = imageUrl;
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    event.target.classList.add('active');
+}
+</script>
+
+<%- include('../partials/footer') %>
+

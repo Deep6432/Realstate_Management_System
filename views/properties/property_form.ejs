@@ -1,0 +1,460 @@
+<%- include('../partials/header', { title: title }) %>
+
+<div class="container">
+    <div class="form-container">
+        <div class="form-header">
+            <h1><%= title %></h1>
+            <a href="/admin/dashboard" class="btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                    <path d="M19 12H5M5 12L12 5M5 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+        
+        <div class="form-card">
+            <form method="post" class="property-form" enctype="multipart/form-data" action="<%= property ? '/admin/property/' + property.id + '/edit' : '/admin/property/add' %>">
+                
+                <div class="form-section">
+                    <h2>Basic Information</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="property_type">Property Type *</label>
+                            <select id="property_type" name="property_type" class="form-input" required>
+                                <option value="">Select Property Type</option>
+                                <% property_types.forEach(function([value, label]) { %>
+                                    <option value="<%= value %>" <%= property && property.property_type === value ? 'selected' : '' %>><%= label %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" name="status" class="form-input" required>
+                                <% status_choices.forEach(function([value, label]) { %>
+                                    <option value="<%= value %>" <%= property && property.status === value ? 'selected' : (!property && value === 'Available' ? 'selected' : '') %>><%= label %></option>
+                                <% }); %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Location Details</h2>
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" id="city" name="city" class="form-input" placeholder="Enter city name" value="<%= property ? property.city : '' %>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="khasra_number">Khasra Number *</label>
+                        <input type="text" id="khasra_number" name="khasra_number" class="form-input" placeholder="Enter khasra number" value="<%= property ? property.khasra_number : '' %>" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="full_address">Full Address *</label>
+                        <textarea id="full_address" name="full_address" class="form-input" rows="3" placeholder="Enter full address" required><%= property ? property.full_address : '' %></textarea>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Property Details</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="size">Size *</label>
+                            <input type="number" id="size" name="size" class="form-input" step="0.01" placeholder="Enter size" value="<%= property ? property.size : '' %>" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="size_unit">Size Unit *</label>
+                            <select id="size_unit" name="size_unit" class="form-input" required>
+                                <% if (typeof size_unit_choices !== 'undefined') { %>
+                                    <% size_unit_choices.forEach(function([value, label]) { %>
+                                        <option value="<%= value %>" <%= property && property.size_unit === value ? 'selected' : '' %>><%= label %></option>
+                                    <% }); %>
+                                <% } else { %>
+                                    <option value="sq ft" <%= property && property.size_unit === 'sq ft' ? 'selected' : '' %>>sq ft</option>
+                                    <option value="sq yard" <%= property && property.size_unit === 'sq yard' ? 'selected' : '' %>>sq yard</option>
+                                    <option value="acre" <%= property && property.size_unit === 'acre' ? 'selected' : '' %>>acre</option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" class="form-input" rows="5" placeholder="Enter property description (optional)"><%= property ? (property.description || '') : '' %></textarea>
+                        <small class="form-help">Optional: Add any additional details about the property</small>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Photos</h2>
+                    
+                    <% if (existing_images && existing_images.length > 0) { %>
+                    <div class="existing-images-section">
+                        <h3>Existing Photos</h3>
+                        <div class="existing-images-grid">
+                            <% existing_images.forEach(function(img) { %>
+                            <div class="existing-image-item">
+                                <img src="/uploads/property_images/<%= img.image %>" alt="Property Image">
+                                <label class="delete-image-checkbox">
+                                    <input type="checkbox" name="delete_images" value="<%= img.id %>">
+                                    <span>Delete</span>
+                                </label>
+                            </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    <% } %>
+                    
+                    <div class="form-group">
+                        <label for="images">Upload Photos</label>
+                        <input type="file" id="images" name="images" class="form-input" accept="image/*" multiple>
+                        <small class="form-help">You can select multiple images (JPG, PNG, GIF, etc.)</small>
+                    </div>
+                    
+                    <div id="image-preview" class="image-preview-container"></div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary"><%= action %> Property</button>
+                    <a href="/admin/dashboard" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.form-header h1 {
+    margin: 0;
+    color: #111827;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.form-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+}
+
+.property-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-section {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 2rem;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h2 {
+    font-size: 1.25rem;
+    color: #111827;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #111827;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.form-input {
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+    background: #ffffff;
+    color: #111827;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-input::placeholder {
+    color: #9ca3af;
+}
+
+.form-input:focus {
+    border-color: #111827;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+    outline: none;
+}
+
+.form-input select,
+.form-input option {
+    background: #ffffff;
+    color: #111827;
+}
+
+.form-input[type="file"] {
+    padding: 0.75rem;
+    cursor: pointer;
+    background: #f9fafb;
+    border: 2px dashed #d1d5db;
+}
+
+.form-input[type="file"]:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.form-input[type="file"]:focus {
+    border-color: #111827;
+    border-style: solid;
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+select.form-input {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23111827' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+.form-help {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+.existing-images-section {
+    margin-bottom: 1.5rem;
+}
+
+.existing-images-section h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #111827;
+    font-weight: 600;
+}
+
+.existing-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.existing-image-item {
+    position: relative;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.existing-image-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.delete-image-checkbox {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.delete-image-checkbox input {
+    margin-right: 0.5rem;
+}
+
+.image-preview-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.image-preview-item {
+    position: relative;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-preview-item .remove-preview {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(220, 38, 38, 0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    background: #111827;
+    color: #ffffff;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    background: #1f2937;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: #ffffff;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-card {
+        padding: 1.5rem;
+    }
+}
+</style>
+
+<script>
+// Image preview functionality
+const imageInput = document.getElementById('images');
+const previewContainer = document.getElementById('image-preview');
+
+if (imageInput) {
+    imageInput.addEventListener('change', function(e) {
+        previewContainer.innerHTML = '';
+        const files = Array.from(e.target.files);
+        
+        files.forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'image-preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}">
+                        <button type="button" class="remove-preview" onclick="removePreview(${index})">×</button>
+                    `;
+                    previewContainer.appendChild(previewItem);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+}
+
+function removePreview(index) {
+    const dt = new DataTransfer();
+    const files = Array.from(imageInput.files);
+    files.splice(index, 1);
+    files.forEach(file => dt.items.add(file));
+    imageInput.files = dt.files;
+    imageInput.dispatchEvent(new Event('change'));
+}
+</script>
+
+<%- include('../partials/footer') %>
+
