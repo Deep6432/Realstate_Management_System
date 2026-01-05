@@ -33,9 +33,24 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-// Static files - serve from root and /static
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/static', express.static(path.join(__dirname, 'public')));
+// Static files - serve from root and /static with explicit configuration
+const staticOptions = {
+  maxAge: '1d',
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    } else if (filePath.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    } else if (filePath.endsWith('.svg')) {
+      res.setHeader('Content-Type', 'image/svg+xml');
+    }
+  }
+};
+
+app.use(express.static(path.join(__dirname, 'public'), staticOptions));
+app.use('/static', express.static(path.join(__dirname, 'public'), staticOptions));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Session configuration
