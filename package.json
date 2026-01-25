@@ -11,7 +11,8 @@
     "deploy": "bash deploy.sh",
     "postinstall": "bash post-install.sh",
     "test-db": "node scripts/test-db.js",
-    "diagnose": "node scripts/diagnose.js"
+    "diagnose": "node scripts/diagnose.js",
+    "check-tables": "node scripts/check-tables.js"
   },
   "keywords": [
     "real-estate",

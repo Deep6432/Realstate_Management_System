@@ -125,12 +125,34 @@ app.use((req, res) => {
   });
 });
 
-// Error handler
+// Error handler - Enhanced logging for production debugging
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
+  // Enhanced error logging
+  console.error('\n❌ ============================================');
+  console.error('❌ INTERNAL SERVER ERROR');
+  console.error('❌ ============================================');
+  console.error(`\n📋 Request Details:`);
+  console.error(`   Method: ${req.method}`);
+  console.error(`   URL: ${req.originalUrl}`);
+  console.error(`   Path: ${req.path}`);
+  console.error(`   IP: ${req.ip}`);
+  console.error(`\n📋 Error Details:`);
+  console.error(`   Message: ${err.message}`);
+  console.error(`   Stack: ${err.stack}`);
+  if (err.original) {
+    console.error(`   Original Error: ${err.original.message}`);
+    console.error(`   SQL State: ${err.original.sqlState || 'N/A'}`);
+    console.error(`   SQL Code: ${err.original.code || 'N/A'}`);
+  }
+  console.error('❌ ============================================\n');
+  
+  // Send response
   res.status(500).render('error', {
     message: 'Internal server error',
-    error: process.env.NODE_ENV === 'development' ? err : null,
+    error: process.env.NODE_ENV === 'development' ? {
+      message: err.message,
+      stack: err.stack
+    } : null,
     user: req.session.user || null
   });
 });
@@ -209,12 +231,40 @@ const startServer = async () => {
       const { Property, PropertyImage } = require('./models/Property');
       const User = require('./models/User');
       
+      // Sync with error handling
       await sequelize.sync({ alter: false }); // Set to { force: true } to drop and recreate tables
       console.log('✅ Database tables synchronized.\n');
+      
+      // Verify tables exist
+      try {
+        const [tables] = await sequelize.query("SHOW TABLES");
+        const tableNames = tables.map(row => Object.values(row)[0]);
+        console.log(`📋 Found ${tableNames.length} table(s) in database:`);
+        tableNames.forEach(table => console.log(`   - ${table}`));
+        console.log('');
+      } catch (verifyError) {
+        console.warn('⚠️  Could not verify tables (non-critical):', verifyError.message);
+      }
     } catch (syncError) {
-      console.error('❌ Database sync failed:', syncError.message);
-      console.error('   This might be due to table structure issues.');
-      console.error('   Check your models and database schema.\n');
+      console.error('\n❌ ============================================');
+      console.error('❌ DATABASE SYNC FAILED');
+      console.error('❌ ============================================');
+      console.error(`\nError: ${syncError.message}`);
+      if (syncError.original) {
+        console.error(`Original Error: ${syncError.original.message}`);
+        console.error(`SQL State: ${syncError.original.sqlState || 'N/A'}`);
+        console.error(`SQL Code: ${syncError.original.code || 'N/A'}`);
+      }
+      console.error('\n📝 Common causes:');
+      console.error('   1. Database user lacks CREATE TABLE permissions');
+      console.error('   2. Table names conflict with existing tables');
+      console.error('   3. Model definitions have syntax errors');
+      console.error('   4. Database connection issues');
+      console.error('\n🔧 Solutions:');
+      console.error('   1. Check database user permissions in Hostinger');
+      console.error('   2. Verify models are correctly defined');
+      console.error('   3. Check server logs for detailed errors');
+      console.error('   4. Run: node scripts/check-tables.js\n');
       throw syncError;
     }
 
