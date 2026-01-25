@@ -9,7 +9,9 @@
     "migrate": "node scripts/migrate.js",
     "seed": "node scripts/seed.js",
     "deploy": "bash deploy.sh",
-    "postinstall": "bash post-install.sh"
+    "postinstall": "bash post-install.sh",
+    "test-db": "node scripts/test-db.js",
+    "diagnose": "node scripts/diagnose.js"
   },
   "keywords": [
     "real-estate",

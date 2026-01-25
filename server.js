@@ -138,34 +138,109 @@ app.use((err, req, res, next) => {
 // Start server
 const startServer = async () => {
   try {
-    // Test database connection
-    const dbConnected = await testConnection();
+    console.log('\n🔍 Starting Real Estate Management System...\n');
+    
+    // Log environment info (without sensitive data)
+    console.log('📋 Environment Configuration:');
+    console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   PORT: ${PORT}`);
+    console.log(`   DB_ENGINE: ${process.env.DB_ENGINE || 'sqlite'}`);
+    if (process.env.DB_ENGINE === 'mysql') {
+      console.log(`   DB_HOST: ${process.env.DB_HOST || 'localhost'}`);
+      console.log(`   DB_NAME: ${process.env.DB_NAME ? '***' : '❌ NOT SET'}`);
+      console.log(`   DB_USER: ${process.env.DB_USER ? '***' : '❌ NOT SET'}`);
+      console.log(`   DB_PASSWORD: ${process.env.DB_PASSWORD ? '***' : '❌ NOT SET'}`);
+    }
+    console.log('');
+
+    // Test database connection with retry logic
+    console.log('🔌 Testing database connection...');
+    let dbConnected = false;
+    let retries = 3;
+    let retryDelay = 2000; // 2 seconds
+
+    while (retries > 0 && !dbConnected) {
+      dbConnected = await testConnection();
+      if (!dbConnected) {
+        retries--;
+        if (retries > 0) {
+          console.log(`⚠️  Database connection failed. Retrying in ${retryDelay/1000}s... (${retries} attempts left)`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
+    }
+
     if (!dbConnected) {
-      console.error('❌ Database connection failed. Please check your database configuration.');
+      console.error('\n❌ ============================================');
+      console.error('❌ DATABASE CONNECTION FAILED');
+      console.error('❌ ============================================');
+      console.error('\n📝 Common causes:');
+      console.error('   1. Database credentials incorrect in .env file');
+      console.error('   2. Database does not exist');
+      console.error('   3. Database server is not running');
+      console.error('   4. Wrong DB_HOST or DB_PORT');
+      console.error('\n🔧 Fix steps:');
+      console.error('   1. Check your .env file on the server');
+      console.error('   2. Verify database exists in Hostinger hPanel');
+      console.error('   3. Test connection: node scripts/test-db.js');
+      console.error('   4. Check Hostinger error logs');
+      console.error('\n');
+      
+      // Log detailed error for debugging
+      try {
+        await sequelize.authenticate();
+      } catch (dbError) {
+        console.error('📋 Database Error Details:');
+        console.error(`   Message: ${dbError.message}`);
+        if (dbError.original) {
+          console.error(`   Original: ${dbError.original.message || dbError.original.code}`);
+        }
+        console.error('');
+      }
+      
       process.exit(1);
     }
 
+    console.log('✅ Database connection established.\n');
+
     // Sync database (create tables if they don't exist)
-    const { Property, PropertyImage } = require('./models/Property');
-    const User = require('./models/User');
-    
-    await sequelize.sync({ alter: false }); // Set to { force: true } to drop and recreate tables
-    console.log('✅ Database tables synchronized.');
+    console.log('📊 Synchronizing database tables...');
+    try {
+      const { Property, PropertyImage } = require('./models/Property');
+      const User = require('./models/User');
+      
+      await sequelize.sync({ alter: false }); // Set to { force: true } to drop and recreate tables
+      console.log('✅ Database tables synchronized.\n');
+    } catch (syncError) {
+      console.error('❌ Database sync failed:', syncError.message);
+      console.error('   This might be due to table structure issues.');
+      console.error('   Check your models and database schema.\n');
+      throw syncError;
+    }
 
     // Create default admin user if it doesn't exist
-    const adminUsername = process.env.ADMIN_USERNAME || 'Ajay';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'Ajay@2026';
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+    try {
+      const User = require('./models/User');
+      const adminUsername = process.env.ADMIN_USERNAME || 'Ajay';
+      const adminPassword = process.env.ADMIN_PASSWORD || 'Ajay@2026';
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
 
-    const existingAdmin = await User.findOne({ where: { username: adminUsername } });
-    if (!existingAdmin) {
-      const admin = await User.create({
-        username: adminUsername,
-        email: adminEmail,
-        password: adminPassword,
-        is_admin: true
-      });
-      console.log(`✅ Default admin user created: ${adminUsername}`);
+      const existingAdmin = await User.findOne({ where: { username: adminUsername } });
+      if (!existingAdmin) {
+        const admin = await User.create({
+          username: adminUsername,
+          email: adminEmail,
+          password: adminPassword,
+          is_admin: true
+        });
+        console.log(`✅ Default admin user created: ${adminUsername}`);
+      } else {
+        console.log(`✅ Admin user already exists: ${adminUsername}`);
+      }
+      console.log('');
+    } catch (userError) {
+      console.error('⚠️  Warning: Could not create admin user:', userError.message);
+      console.error('   You may need to create an admin user manually.\n');
     }
 
     // Start server - listen on 0.0.0.0 for Hostinger
@@ -181,18 +256,38 @@ const startServer = async () => {
       console.log(`   - Admin Login: http://localhost:${PORT}/login`);
       console.log(`   - Admin Dashboard: http://localhost:${PORT}/admin/dashboard`);
       console.log(`\n👤 Default Admin Credentials:`);
-      console.log(`   Username: ${adminUsername}`);
-      console.log(`   Password: ${adminPassword}`);
+      console.log(`   Username: ${process.env.ADMIN_USERNAME || 'Ajay'}`);
+      console.log(`   Password: ${process.env.ADMIN_PASSWORD || 'Ajay@2026'}`);
       console.log(`\n`);
     }).on('error', (err) => {
-      console.error('❌ Server failed to start:', err);
+      console.error('\n❌ ============================================');
+      console.error('❌ SERVER FAILED TO START');
+      console.error('❌ ============================================');
+      console.error(`\nError: ${err.message}`);
       if (err.code === 'EADDRINUSE') {
-        console.error(`⚠️  Port ${PORT} is already in use. Try a different port.`);
+        console.error(`\n⚠️  Port ${PORT} is already in use.`);
+        console.error('   Solutions:');
+        console.error('   1. Change PORT in .env file');
+        console.error('   2. Stop the process using this port');
+        console.error('   3. Let Hostinger assign port automatically');
       }
+      console.error('');
       process.exit(1);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error('\n❌ ============================================');
+    console.error('❌ FAILED TO START SERVER');
+    console.error('❌ ============================================');
+    console.error(`\nError: ${error.message}`);
+    console.error(`\nStack trace:`);
+    console.error(error.stack);
+    console.error('\n📝 Check the error above and fix the issue.');
+    console.error('   Common issues:');
+    console.error('   - Database connection failed');
+    console.error('   - Missing environment variables');
+    console.error('   - Missing dependencies (run: npm install)');
+    console.error('   - File permissions incorrect');
+    console.error('');
     process.exit(1);
   }
 };
